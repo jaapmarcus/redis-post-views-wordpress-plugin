@@ -46,6 +46,17 @@ class Redis_Post_Views {
         $this->plugin_url = plugins_url('', dirname(__FILE__));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_js'));
         if ( is_admin() ) {
+            add_filter('manage_post_posts_columns', function($columns) {
+                return array_merge($columns, ['views' => 'Views']);
+            });
+            
+            add_action('manage_post_posts_custom_column', function($column_key, $post_id) {
+                if ($column_key == 'views') {
+                    $views = get_post_meta($post_id, 'redis_post_views_count', true);
+                    echo $views; 
+                }
+            }, 10, 2);
+            
             add_action('admin_menu', array($this, 'add_menu_item'));
             add_action('wp_ajax_rpv_sync_action', array($this, 'sync_action'));
             add_action('wp_ajax_rpv_sync_all_action', array($this, 'sync_all_action'));
