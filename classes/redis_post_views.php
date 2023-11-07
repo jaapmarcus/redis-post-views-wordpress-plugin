@@ -57,6 +57,9 @@ class Redis_Post_Views {
                 }
             }, 10, 2);
             
+            add_filter('manage_edit-post_sortable_columns', array($this, 'redis_post_views_count_table_sorting'));
+            add_filter('request', array($this, 'redis_post_views_count_column_sort'));
+            
             add_action('admin_menu', array($this, 'add_menu_item'));
             add_action('wp_ajax_rpv_sync_action', array($this, 'sync_action'));
             add_action('wp_ajax_rpv_sync_all_action', array($this, 'sync_all_action'));
@@ -456,4 +459,19 @@ class Redis_Post_Views {
         </div>
     <?php
     }
+    
+    function redis_post_views_count_table_sorting($columns){
+        return array_merge($columns, ['views' => 'Views']);
+    }
+    
+    function redis_post_views_count_column_sort($vars) {
+            if (isset( $vars['orderby']) && 'Views' == $vars['orderby']) {
+                    $vars = array_merge( $vars, array(
+                            'meta_key' => 'redis_post_views_count',
+                            'orderby' => 'meta_value_num'
+                    ));
+            }
+            return $vars;
+    }
+    
 }
